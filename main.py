@@ -293,10 +293,14 @@ def client(host, port):
       cli_met.list_users(s)
 
     elif response == "3":
-      cli_met.send_msg(s, signed_in_user)
+      contFlag = cli_met.send_msg(s, signed_in_user)
+      if contFlag:
+        continue
     
     elif response == "4":
-      cli_met.get_messages(s, signed_in_user)
+      contFlag = cli_met.get_messages(s, signed_in_user)
+      if contFlag:
+        continue
 
     elif response == "5":
       if cli_met.delete_acct(s, signed_in_user):

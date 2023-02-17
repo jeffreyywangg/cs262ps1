@@ -162,22 +162,27 @@ def delete_acct(s: socket.socket, signed_in_user: str) -> bool:
             send_action(s, 5, bytes(signed_in_user, 'utf-8'))
             return True
 
-def get_messages(s: socket.socket, signed_in_user: str):
+def get_messages(s: socket.socket, signed_in_user: str) -> bool:
     """
     Get undelivered messages. Action #4. 
     """
+    continueFlag = False
     if len(signed_in_user) == 0:
         print("You are not logged in. Please create an account or log in with Option #1.\n")
+        continueFlag = True
     else:
         send_action(s, 4, bytes(signed_in_user, 'utf-8'))
         print(listen_server_response(s))
+    return continueFlag
 
-def send_msg(s: socket.socket, signed_in_user: str):
+def send_msg(s: socket.socket, signed_in_user: str) -> bool:
     """
     Send a message. Action #3. 
     """
+    continueFlag = False
     if len(signed_in_user) == 0:
         print("You need to create a user before you can send messages.")
+        continueFlag = True
     else:
         uname = input("Enter a username to send a message to: \n")
         satisfied = input(f"You will send a message to {uname}. If you want to re-enter, enter 1. Otherwise, if satisfied, enter anything else. ")
@@ -189,6 +194,7 @@ def send_msg(s: socket.socket, signed_in_user: str):
         msg_format = f"{uname}\nFROM: {signed_in_user}\nTO: {uname}\n\nMESSAGE: {msg}\n"
         send_action(s, 3, bytes(msg_format, 'utf-8'))
     print(listen_server_response(s))
+    return continueFlag
 
 def list_users(s: socket.socket):
     """
