@@ -47,20 +47,22 @@ def server(port):
     Spawn a new thread, and poll.
     """
     while True: # while server is running? 
-      # print("ping!")
+      print("ping!")
       time.sleep(5) # only poll every 5 seconds
       remove = []
-      mutex.acquire()
+      # print("ping!2")
       for thread in thread_watchdog:
+        # print("ping!3")
         timediff: float = time.time() - thread_watchdog[thread]
-        # Kill threads that are idle for more than 20 seconds
-        if timediff > 60:
+        # Kill threads that are idle for more than X seconds
+        if timediff > 120:
           print(f"Shutting down thread {str(thread)}")
           thread.shutdown(socket.SHUT_RDWR) # TODO how to justify this particular shutdown mode
           thread.close()
           socket_thread_event[thread].set() # kill the thread
           remove.append(thread)
 
+      mutex.acquire()
       for r in remove:
           del thread_watchdog[r]
       mutex.release()
@@ -93,15 +95,17 @@ def server(port):
   def server_client_handler(s, e: threading.Event):
 
     while True:
+      
       if e.is_set():
         break
-
+      
       version = receive_sized_int(s, 1)
-      print('Version:', version)
 
       mutex.acquire()
       thread_watchdog[s] = time.time()
       mutex.release()
+
+      print('Version:', version)
 
       if version == 0:
         action = receive_sized_int(s, 1)
@@ -256,12 +260,13 @@ def client(host, port):
     if firstTime:
       firstTime = False
     else:
-      response = cli_met.user_query()
+      disp_msg = "Take your next action. Press H to get the directions again. "
+      response = cli_met.user_query(disp_msg)
       
     if response == "H":
       response = cli_met.user_query()
       
-    elif response == "0" or response == "1":
+    if response == "0" or response == "1":
       # LOGIN or SIGNIN to acct
 
       if len(signed_in_user) > 0:
@@ -300,8 +305,8 @@ def client(host, port):
   print("Thanks for visiting the Marco/Jeffrey chat room!")
 
 if sys.argv[1] == 'server':
-  server(8009)
+  server(8013)
 else:
-  client('localhost', 8009)
+  client('localhost', 8013)
 
 

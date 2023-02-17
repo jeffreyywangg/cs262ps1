@@ -10,6 +10,8 @@ Each message looks like this:
 (4) [size] bytes body
 """
 
+import sys
+
 def receive_sized_int(s, size) -> int:
   return int.from_bytes(receive_sized(s, size), 'big')
 
@@ -20,7 +22,10 @@ def receive_sized(s, size):
   combined = b''
 
   while True:
-    msg = s.recv(size)
+    try:
+      msg = s.recv(size)
+    except: # thread killed by watchdog (NOTE - could also use a conditional variable here? maybe better?)
+      sys.exit(0)
     combined += msg
     if len(combined) >= size:
       return combined
