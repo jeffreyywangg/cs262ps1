@@ -61,13 +61,14 @@ def server(port):
     Spawn a new thread, and poll.
     """
     while True: # while server is running? 
-      print("ping!")
+      # print("ping!")
       time.sleep(5) # only poll every 5 seconds
       remove = []
+      mutex.acquire()
       for thread in thread_watchdog:
         timediff: float = time.time() - thread_watchdog[thread]
         # Kill threads that are idle for more than 20 seconds
-        if timediff > 20:
+        if timediff > 60:
           print(f"Shutting down thread {str(thread)}")
           thread.shutdown(socket.SHUT_RDWR) # TODO how to justify this particular shutdown mode
           thread.close()
@@ -76,6 +77,7 @@ def server(port):
 
       for r in remove:
           del thread_watchdog[r]
+      mutex.release()
 
   def graceful_exit():
     """
@@ -245,10 +247,12 @@ def server(port):
 
   while True:
     s, _ = serversocket.accept()
+    mutex.acquire()
     thread_watchdog[s] = time.time()
+    mutex.release()
     event = Event()
     socket_thread_event[s] = event
-    threading.Thread(target=server_client_handler, args=(s, event))
+    threading.Thread(target=server_client_handler, args=(s, event)).start()
     threading.Thread(target=watchdog, daemon=True).start()
 
 def client(host, port):
@@ -310,8 +314,8 @@ def client(host, port):
   print("Thanks for visiting the Marco/Jeffrey chat room!")
 
 if sys.argv[1] == 'server':
-  server(8007)
+  server(8009)
 else:
-  client('localhost', 8007)
+  client('localhost', 8009)
 
 
