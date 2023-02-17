@@ -1,3 +1,15 @@
+"""
+The Marco-Jeffrey wire protocol.
+
+Each message looks like this:
+[ (1) ] [ (2) ] [ (3) ] [ (4) ]
+
+(1) 1 byte version #
+(2) 1 byte action # 
+(3) 4 bytes size of body
+(4) [size] bytes body
+"""
+
 def receive_sized_int(s, size) -> int:
   return int.from_bytes(receive_sized(s, size), 'big')
 
