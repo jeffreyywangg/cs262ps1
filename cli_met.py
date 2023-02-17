@@ -156,10 +156,10 @@ def delete_acct(s: socket.socket, signed_in_user: str) -> bool:
     if confirm == "Yes":
         view = input("Do you want to view your messages? Press 1 to view and return to not. ")
         if view == "1":
-            print(send_action(s, 4, bytes(signed_in_user, 'utf-8')))
+            send_action(s, 4, bytes(signed_in_user, 'utf-8'))
             return False
         else:
-            print(send_action(s, 5, bytes(signed_in_user, 'utf-8')))
+            send_action(s, 5, bytes(signed_in_user, 'utf-8'))
             return True
 
 def get_messages(s: socket.socket, signed_in_user: str):
@@ -169,7 +169,7 @@ def get_messages(s: socket.socket, signed_in_user: str):
     if len(signed_in_user) == 0:
         print("You are not logged in. Please create an account or log in with Option #1.\n")
     else:
-        print(send_action(s, 4, bytes(signed_in_user, 'utf-8')))
+        send_action(s, 4, bytes(signed_in_user, 'utf-8'))
         print(listen_server_response(s))
 
 def send_msg(s: socket.socket, signed_in_user: str):
