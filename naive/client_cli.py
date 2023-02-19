@@ -21,7 +21,7 @@ class ClientCli():
 
     firstTime = True
     while True:
-      self.client.flush_messages()
+      print('\n\n'.join(self.client.flush_messages()))
 
       response = None
 
@@ -33,7 +33,8 @@ class ClientCli():
         response = self.user_query(disp_msg)
 
       if response == "H":
-        response = self.user_query()
+        firstTime = True
+        continue
       elif response == "0" or response == "1":
         if self.signed_in_user:
           logout = self.logout_confirm()
@@ -103,16 +104,13 @@ class ClientCli():
       print('Error. Please try again.')
 
   def delete_acct(self):
-    """
-    Delete acct. Returns true if user goes thru all the way; false if not. Action #5.
-    """
     if not self.signed_in_user:
       print("You are not logged in. Please create an account or log in with Option #1.")
       return
 
     confirm = input("You have asked to delete your account! Are you sure? Enter `Yes` to do so. ")
     if confirm == "Yes":
-      self.client.send_action_and_body(5, bytes(self.username, 'utf-8'))
+      self.client.send_action_and_body(5, bytes(self.signed_in_user, 'utf-8'))
     self.handle_sucess_failure()
 
   def get_messages(self):
