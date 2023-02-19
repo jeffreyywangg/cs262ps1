@@ -1,13 +1,9 @@
 """
-The Marco-Jeffrey wire protocol.
-
-Each message looks like this:
-[ (1) ] [ (2) ] [ (3) ] [ (4) ]
-
 (1) 1 byte version #
-(2) 1 byte action # 
+(2) 1 byte action #
 (3) 4 bytes size of body
 (4) [size] bytes body
+(5) 16 bytes of authentication, if necessary
 """
 
 import sys
@@ -33,3 +29,4 @@ def receive_sized(s, size):
 def send_sized_int(s, num, size) -> None:
   s.send(num.to_bytes(size, 'big'))
 
+ZERO_BYTE = int.to_bytes(0, 1, 'big')
