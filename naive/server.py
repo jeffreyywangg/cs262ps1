@@ -128,10 +128,9 @@ class Server:
               print(f'User {username} failed to sign up.')
 
         elif action == 2:
-          # List
+          # List (no authentication required)
           size = receive_sized_int(s, 4)
           body = receive_sized_string(s, size)
-          username = self.check_authentication(s)
 
           if not username:
             self.send_error(s, 10)
@@ -139,7 +138,7 @@ class Server:
 
           if body == "\n":
             print("No regex received from client. Returning all account usernames.")
-            self.send_body(s, 10, bytes(', '.join(self.client_messages.keys()), 'utf-8'))
+            self.send_body(s, 10, bytes(','.join(self.client_messages.keys()), 'utf-8'))
           else:
             try:
               pattern = re.compile(body)
@@ -147,7 +146,7 @@ class Server:
               for uname in self.client_messages.keys():
                 if pattern.match(uname):
                   matches.append(uname)
-              self.send_body(s, 10, bytes(', '.join(matches), 'utf-8'))
+              self.send_body(s, 10, bytes(','.join(matches), 'utf-8'))
               print('Sent usernames matching regex.')
             except re.error:
               self.send_error(s, 10)

@@ -4,8 +4,8 @@ from server import *
 
 if len(sys.argv) > 1 and sys.argv[1] == 'server':
   server = Server()
-  server.start(8013)
+  server.start(8015)
 else:
   cli = ClientCli()
-  cli.main('localhost', 8013)
+  cli.main('localhost', 8015)
 
