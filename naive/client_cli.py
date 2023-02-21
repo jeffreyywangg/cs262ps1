@@ -2,7 +2,6 @@ from wireprotocol import *
 from client import *
 import socket
 import sys
-from typing import Tuple
 
 DISP_MSG = "Select from your options:" \
         "\n Enter 1 to create an account or log in." \
@@ -13,17 +12,18 @@ DISP_MSG = "Select from your options:" \
         "\n Enter Q to exit the application. \n\nYour choice: "
 
 class ClientCli():
+  """
+  Main client object with event loop.
+  """
   client = Client()
   signed_in_user = None
 
   def user_loop(self):
-    valid_responses = ["H", "0", "1", "2", "3", "4", "5", "6"]
 
-    firstTime = True
+    firstTime = True  # display DISP_MSG for the first time, and after that only when prompted. 
     while True:
       print('\n\n'.join(self.client.flush_messages()))
-
-      response = None
+      response = None # user response
 
       if firstTime:
         firstTime = False
@@ -35,7 +35,8 @@ class ClientCli():
       if response == "H":
         firstTime = True
         continue
-      elif response == "0" or response == "1":
+      
+      elif response == "0" or response == "1": # Create account or sign in. 
         if self.signed_in_user:
           logout = self.logout_confirm()
           if logout == "Y":
@@ -49,15 +50,15 @@ class ClientCli():
             continue
         else:
           self.create_login_logic()
-      elif response == "2":
+      elif response == "2": 
         self.list_users()
-      elif response == "3":
+      elif response == "3": 
         self.send_msg()
       elif response == "4":
         self.get_messages()
       elif response == "5":
         self.delete_acct()
-      elif response == "Q":
+      elif response == "Q": # Quit!
         break
 
   def main(self, host, port):
@@ -70,6 +71,7 @@ class ClientCli():
     if response == "0":
       sys.exit(0)
 
+    # Server connection
     try:
       self.client = Client()
       self.client.run(host, port)
@@ -90,30 +92,38 @@ class ClientCli():
   def get_password(self) -> str:
     return input("Enter a password: \n")
 
-  def create_login_logic(self):
+  def create_login_logic(self) -> None:
     """
-    Main method to handle login logic.
+    Main method to handle login logic. Error messages provided on client side.
     """
 
+    # Ask user for uname/password
     uname = self.get_username()
     pswd = self.get_password()
+
+    # Server request and error handling 
     if self.client.authenticate(uname, pswd):
       self.signed_in_user = uname
       print('Authentication successful!')
     else:
-      print('Error. Please try again.')
-
-  def delete_acct(self):
+      print('Error. Please try again. Usernames must be alphabetical; passwords len > 0.')
+  
+  def delete_acct(self) -> None:
+    """
+    Delete account. Confirms action and sends message to server. Action #5. 
+    """
+    # Check permissions permissions
     if not self.signed_in_user:
       print("You are not logged in. Please create an account or log in with Option #1.")
       return
 
+    # Server request and error handling 
     confirm = input("You have asked to delete your account! Are you sure? Enter `Yes` to do so. ")
     if confirm == "Yes":
       self.client.send_action_and_body(5, bytes(self.signed_in_user, 'utf-8'))
     self.handle_sucess_failure()
 
-  def get_messages(self):
+  def get_messages(self) -> None:
     """
     Get undelivered messages. Action #4.
     """
@@ -121,46 +131,59 @@ class ClientCli():
       print("You are not logged in. Please create an account or log in with Option #1.\n")
       return
 
+    # Server request and error handling 
     self.client.send_action_and_body(4, bytes(self.signed_in_user, 'utf-8'))
     self.handle_sucess_failure()
 
-  def send_msg(self):
+  def send_msg(self) -> None:
     """
     Send a message. Action #3.
     """
+    # Check permissions
     if not self.signed_in_user:
       print("You need to create a user before you can send messages.")
       return
 
+    # Get destination user
     uname = input("Enter a username to send a message to: \n")
     satisfied = input(f"You will send a message to {uname}. If you want to re-enter, enter 1. Otherwise, if satisfied, enter anything else. ")
     while satisfied == "1":
       uname = input("Enter a username: \n")
       satisfied = input(f"You will send a message to {uname}. If you want to re-enter, enter 1. Otherwise, if satisfied, enter anything else. ")
 
+    # Get message 
     msg = input("Enter a message: \n")
     msg_format = f"{uname}:FROM: {self.signed_in_user}\nTO: {uname}\n\nMESSAGE: {msg}\n"
+
+    # Server request and error handling 
     self.client.send_action_and_body(3, bytes(msg_format, 'utf-8'))
     self.handle_sucess_failure()
 
-  def list_users(self):
+  def list_users(self) -> None:
     """
     List users. Action #2.
     """
+    # User prompt
     regex = input("Do you wish to list usernames that match a regex? If so, enter one; if not, hit return. \n")
     if len(regex) == 0:
       self.client.send_action_and_body(2, bytes("\n", 'utf-8'))
     else:
       self.client.send_action_and_body(2, bytes(regex, 'utf-8'))
+    
+    # Server request and error handling 
     _, response = self.client.receive_response_from_server()
     if response:
       print(str(response, 'utf-8'))
     else:
-      print('Error.')
+      print('Error. Server did not handle request.')
 
   def handle_sucess_failure(self):
+    """
+    Wrapper method for receiving server feedback on actions that are one-directional (client > server). 
+    E.g. deleting an account, sending a message, etc. 
+    """
     if self.client.receive_success_from_server():
       print("Success!")
     else:
-      print("Error.")
+      print("Error. Server did not handle request.")
 

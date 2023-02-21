@@ -5,60 +5,67 @@ from threading import Lock, Event
 import re
 import uuid
 from wireprotocol import *
+from typing import Tuple, Dict, List
 
 class Server:
-  mutex = Lock()
-  client_messages: dict[str, list[str]] = {}
-  client_passwords: dict[str, str] = {}
-  client_tokens: dict[str, bytes] = {}
-  client_sockets: dict[str, socket.socket] = {}
-  sockets_watchdog: dict[socket.socket, float] = {}
+  mutex = Lock()                                      # mutex for editing any server data (dictionaries below)
+  client_messages: Dict[str, List[str]] = {}          # {uname: [msg1, msg2, ...]}
+  client_passwords: Dict[str, str] = {}               # {uname: pswd}
+  client_tokens: Dict[str, bytes] = {}                # {uname: auth_token}
+  client_sockets: Dict[str, socket.socket] = {}       # {uname: socket}
+  sockets_watchdog: Dict[socket.socket, float] = {}   # {socket: time_since_last_ping}
 
-  def send_body(self, s, action, body):
+  def send_body(self, s: socket.socket, action: int, body: int) -> None:
     """
-    Server-specific method to send a body to the client.
+    Send a message via wire protocol to client. 
     """
-    try:
+
+    try:    # Send version #
       send_sized_int(s, 0, 1)
-    except:
+    except: # If client terminates connection suddenly
       print("ERROR - Connection lost to client.")
       del self.sockets_watchdog[s]
 
+    # Send action, length of body, and body.
     send_sized_int(s, action, 1)
     send_sized_int(s, len(body), 4)
     s.send(body)
 
-  def send_error(self, s, action):
+  def send_error(self, s: socket.socket, action: int) -> None:
     """
     Server-specific method to send that an error occurred to the client.
+    Same as send_body except sends a zero int. 
     """
-    try:
+    try:    # Send version #
       send_sized_int(s, 0, 1)
-    except:
+    except: # If client terminates connection suddenly
       print("ERROR - Connection lost to client.")
       del self.sockets_watchdog[s]
 
     send_sized_int(s, action, 1)
     send_sized_int(s, 0, 4)
 
-  def check_authentication(self, s):
+  def check_authentication(self, s: socket.socket) -> None:
+    """
+    Check if user authentication token correct (for secure/pswd-protected features). 
+    """
     token = receive_sized(s, 16)
     for username in self.client_tokens:
       if self.client_tokens[username] == token:
         return username
 
-  def watchdog(self):
+  def watchdog(self) -> None:
     """
-    Poll threads for closure
-    Spawn a new thread, and poll.
+    Spawn a new thread, and poll every 5 seconds other threads for closure. 
+    Note that sockets_watchdog maintains the last connection by thread to server.
     """
     while True:
       time.sleep(5)
       to_remove = []
       for s in self.sockets_watchdog:
-        timediff: float = time.time() - self.sockets_watchdog[s]
-        # Kill sockets that are idle for more than X seconds
-        if timediff > 120:
+        timediff: float = time.time() - self.sockets_watchdog[s] # time difference b/t now and last client request
+
+        if timediff > 600: # Kill threads inactive for > 600 seconds.
           print(f"Shutting down socket {str(s)}")
           s.shutdown(socket.SHUT_RDWR)
           s.close()
@@ -69,7 +76,10 @@ class Server:
         del self.sockets_watchdog[r]
       self.mutex.release()
 
-  def server_client_loop(self, s):
+  def server_client_loop(self, s: socket.socket) -> None:
+    """
+    Main server/client logic. 
+    """
     while True:
       if s not in self.sockets_watchdog:
         return
@@ -90,11 +100,12 @@ class Server:
           size = receive_sized_int(s, 4)
           body = receive_sized_string(s, size)
 
+          # body contains username:password
           index_colon = body.index(':')
           username = body[:index_colon]
           password = body[index_colon+1:]
 
-          if username in self.client_messages:
+          if username in self.client_messages: # If user exists already...
             if self.client_passwords[username] == password:
               self.client_sockets[username] = s
               self.send_body(s, 10, self.client_tokens[username])
@@ -102,8 +113,8 @@ class Server:
             else:
               self.send_error(s, 10)
               print(f'User {username} failed to login.')
-          else:
-            if re.match('^[a-z_]+$', username) and len(password) > 0:
+          else: # If user DNE
+            if re.match('^[a-z_]+$', username) and len(password) > 0: # valid usernames must be alphabetical
               self.mutex.acquire()
               self.client_sockets[username] = s
               self.client_messages[username] = []
@@ -115,6 +126,7 @@ class Server:
             else:
               self.send_error(s, 10)
               print(f'User {username} failed to sign up.')
+
         elif action == 2:
           # List
           size = receive_sized_int(s, 4)
