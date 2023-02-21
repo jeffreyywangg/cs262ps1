@@ -60,7 +60,7 @@ class ServerServicer(service_pb2_grpc.MessageServiceServicer):
     body = request.request
     if body == "\n":
       print("No regex received from client. Returning all account usernames.")
-      return service_pb2.StringResponse(success=True, response=', '.join(self.client_messages.keys()))
+      return service_pb2.StringResponse(success=True, response=','.join(self.client_messages.keys()))
     else:
       try:
         pattern = re.compile(body)
@@ -69,7 +69,7 @@ class ServerServicer(service_pb2_grpc.MessageServiceServicer):
           if pattern.match(uname):
             matches.append(uname)
         print('Sent usernames matching regex.')
-        return service_pb2.StringResponse(success=True, response=', '.join(matches))
+        return service_pb2.StringResponse(success=True, response=','.join(matches))
       except re.error:
         return service_pb2.StringResponse(success=False, response="")
 
