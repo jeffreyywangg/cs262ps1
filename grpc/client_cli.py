@@ -9,7 +9,7 @@ DISP_MSG = "Select from your options:" \
         "\n Enter 2 to list current usernames. You will be prompted for a regex (if desired)." \
         "\n Enter 3 to send a message to a recipient. You will be prompted for a user + message." \
         "\n Enter 4 to pull your current undelivered messages." \
-        "\n Enter 5 to delete your account. If you have undelivered messages, you can choose to view them." \
+        "\n Enter 5 to delete your account." \
         "\n Enter Q to exit the application. \n\nYour choice: "
 
 class ClientCli():
@@ -41,6 +41,7 @@ class ClientCli():
             print(f"Logging out of {self.signed_in_user}...")
             time.sleep(0.1)
             self.signed_in_user = None
+            self.signed_in_token = None
 
             self.create_login_logic()
           else:
@@ -105,11 +106,13 @@ class ClientCli():
       print("You are not logged in. Please create an account or log in with Option #1.")
       return
 
-    confirm = input("You have asked to delete your account! Are you sure? Enter `Yes` to do so. ")
-    if confirm == "Yes":
+    confirm = input("You have asked to delete your account! Are you sure? Enter Y to do so, anything else to cancel. ")
+    if confirm == "Y":
       self.handle_sucess_failure_response(
         self.client.Delete(service_pb2.DeleteRequest(token=self.signed_in_token, username=self.signed_in_user))
       )
+      self.signed_in_user = None
+      self.signed_in_token = None
 
   def get_messages(self):
     """

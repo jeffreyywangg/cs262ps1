@@ -9,11 +9,11 @@ from typing import List
 class Client():
   s: socket.socket = None # client socket
   auth_token = None       # bytestring for authentication w/ server
-  buffered_messages: List[str] = [] # TODO
+  buffered_messages: List[str] = []
 
   def receive_response_from_server(self):
     """
-    Get server response for action that requires response. 
+    Get server response for action that requires response.
     """
 
     # Connect to server (make sure alive)
@@ -38,7 +38,7 @@ class Client():
 
   def receive_success_from_server(self):
     """
-    Get server response for action that requires no response. 
+    Get server response for action that requires no response.
     """
     _, body = self.receive_response_from_server()
     return body is not None
@@ -57,7 +57,7 @@ class Client():
 
     send_sized_int(self.s, action, 1)
 
-    # Send body and/or auth token, if needed. Some methods, like one directional cli > serv communication, don't need these. 
+    # Send body and/or auth token, if needed. Some methods, like one directional cli > serv communication, don't need these.
     if body:
       send_sized_int(self.s, len(body), 4)
       self.s.send(body)
@@ -67,7 +67,7 @@ class Client():
 
   def authenticate(self, username: str, password: str) -> None:
     """
-    Get authentication token for username/password, to ensure current session working. 
+    Get authentication token for username/password, to ensure current session working.
     """
     self.send_action_and_body(1, bytes(username + ':' + password, 'utf-8'))
     response_action, response_body = self.receive_response_from_server()
@@ -76,7 +76,7 @@ class Client():
 
   def deauthenticate(self) -> None:
     self.auth_token = None
-  
+
   def run(self, host, port):
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.connect((host, port))
