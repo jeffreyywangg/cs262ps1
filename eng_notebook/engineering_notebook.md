@@ -133,13 +133,15 @@ Our server spawns a new thread for each incoming connection.
 
 To address unexpected errors, 
 
+> All of this is true to my knowledge only for naive (dk about GRPC)
+
 Behavior | Client: Timeout | Client: Volunteer Exit | Client: Crash
 ------------ | ------------ | ------------ | -------------
-Server | Watchdog closes socket connection + thread. If client side tries to connect again, exception caught. | Unclear | Unclear
+Server | Watchdog closes socket connection + thread. If client side tries to connect again, exception caught. | I think the server socket just times out and then the server closes it. But there should be a message sent to just auto-close. | Unclear (I think the server will just close it after 600 seconds?)
 
 Behavior | Server: Timeout | Server: Volunteer Exit | Server: Crash
 ------------ | ------------ | ------------ | -------------
-Client | Unclear. | Unclear. | Unclear. 
+Client | The client just hangs. | Not implemented. | I think this gets caught in a try/except (e.g. if the socket is broken then it's caught).  
 
 ## Unit Tests
 
