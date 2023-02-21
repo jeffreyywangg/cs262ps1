@@ -139,7 +139,7 @@ class Server:
 
           if body == "\n":
             print("No regex received from client. Returning all account usernames.")
-            self.send_body(s, 10, bytes(','.join(self.client_messages.keys()), 'utf-8'))
+            self.send_body(s, 10, bytes(', '.join(self.client_messages.keys()), 'utf-8'))
           else:
             try:
               pattern = re.compile(body)
@@ -147,7 +147,7 @@ class Server:
               for uname in self.client_messages.keys():
                 if pattern.match(uname):
                   matches.append(uname)
-              self.send_body(s, 10, bytes(','.join(matches), 'utf-8'))
+              self.send_body(s, 10, bytes(', '.join(matches), 'utf-8'))
               print('Sent usernames matching regex.')
             except re.error:
               self.send_error(s, 10)
