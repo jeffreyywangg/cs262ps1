@@ -8,30 +8,37 @@ import grpc
 import service_pb2
 import service_pb2_grpc
 from threading import Lock, Event
+from typing import List, Dict
 
 class ServerServicer(service_pb2_grpc.MessageServiceServicer):
-  mutex = Lock()
-  client_messages: dict[str, list[str]] = {}
-  client_passwords: dict[str, str] = {}
-  client_tokens: dict[str, bytes] = {}
+  mutex = Lock()                              # Lock for all server dictionaries
+  client_messages: Dict[str, List[str]] = {}  # {username: [user_msgs]}
+  client_passwords: Dict[str, str] = {}       # {username: password}
+  client_tokens: Dict[str, bytes] = {}        # {username: authentication_token}
 
   def check_authentication(self, request):
+    """
+    Check if user is logged in (with authentication token sent in message). 
+    """
     for username in self.client_tokens:
       if self.client_tokens[username] == request.token:
         return username
 
   def Authenticate(self, request, context):
+    """
+    Authenticate a login, or create an account.
+    """
     username = request.username
     password = request.password
-    if username in self.client_messages:
+    if username in self.client_messages: # if user exists, attempt login. 
       if self.client_passwords[username] == password:
         print(f'User {username} logged in successfully.')
         return service_pb2.StringResponse(success=True, response=self.client_tokens[username])
       else:
         print(f'User {username} failed to login.')
         return service_pb2.StringResponse(success=False, response="")
-    else:
-      if re.match('^[a-zA-Z_]+$', username) and len(password) > 0:
+    else: # if user does not exist, attempt account creation.                               
+      if re.match('^[a-zA-Z_]+$', username) and len(password) > 0: # usernames must be alphabetical
         self.mutex.acquire()
         self.client_messages[username] = []
         self.client_passwords[username] = password
@@ -44,7 +51,10 @@ class ServerServicer(service_pb2_grpc.MessageServiceServicer):
         return service_pb2.StringResponse(success=False, response="")
 
   def List(self, request, context):
-    if not self.check_authentication(request):
+    """
+    List accounts, separated by a comma. 
+    """
+    if not self.check_authentication(request): # TODO - when is this hit? 
       return service_pb2.StringResponse(success=False, response="")
 
     body = request.request
@@ -58,31 +68,40 @@ class ServerServicer(service_pb2_grpc.MessageServiceServicer):
         for uname in self.client_messages.keys():
           if pattern.match(uname):
             matches.append(uname)
-        return service_pb2.StringResponse(success=True, response=','.join(matches))
         print('Sent usernames matching regex.')
+        return service_pb2.StringResponse(success=True, response=', '.join(matches))
       except re.error:
         return service_pb2.StringResponse(success=False, response="")
 
   def Send(self, request, context):
-    if not self.check_authentication(request):
+    """
+    Add a message to someone's undelivered. 
+    """
+    if not self.check_authentication(request): 
       return service_pb2.EmptyResponse(success=False)
 
-    if request.username not in self.client_messages:
+    if request.username not in self.client_messages: 
       return service_pb2.EmptyResponse(success=False)
     else:
       self.mutex.acquire()
-      self.client_messages[username].append(text)
+      self.client_messages[request.username].append(text) # TODO - "text" is not defined
       self.mutex.release()
       print('Sent message.')
       return service_pb2.EmptyResponse(success=True)
 
   def Deliver(self, request, context):
+    """
+    Pull user's undelivered messages and send. 
+    """
     matching_username = self.check_authentication(request)
     if not matching_username:
       return service_pb2.StringResponse(success=False, response="")
     return service_pb2.StringResponse(success=True, response="\n\n".join(self.client_messages[matching_username]))
 
   def Delete(self, request, context):
+    """
+    Delete account. 
+    """
     if not self.check_authentication(request):
       return service_pb2.EmptyResponse(success=False)
 
@@ -90,7 +109,7 @@ class ServerServicer(service_pb2_grpc.MessageServiceServicer):
       return service_pb2.EmptyResponse(success=False)
 
     self.mutex.acquire()
-    del self.client_messages[body]
+    del self.client_messages[body] # TODO - body is not defined
     del self.client_sockets[body]
     del self.client_passwords[body]
     del self.client_tokens[body]

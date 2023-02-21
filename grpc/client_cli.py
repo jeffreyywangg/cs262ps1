@@ -2,6 +2,7 @@ import grpc
 import sys
 import service_pb2
 import service_pb2_grpc
+import time
 
 DISP_MSG = "Select from your options:" \
         "\n Enter 1 to create an account or log in." \
