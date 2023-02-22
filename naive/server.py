@@ -96,7 +96,6 @@ class Server:
           if self.client_sockets[u] == s:
             del self.client_sockets[u]
       self.mutex.release()
-      print("released")
 
   def server_client_loop(self, s: socket.socket) -> None:
     """

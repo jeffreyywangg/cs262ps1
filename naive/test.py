@@ -9,9 +9,6 @@ class ClientServersTest(unittest.TestCase):
   for a particular user/pswd. This would not be an accessible method in runtime/production.
   """
 
-  def close_server(self, server):
-    server.test_close()
-
   def setup_server_and_clients(self, port, client_count):
     server = Server()
     threading.Thread(target=server.start, args=(port,)).start()
@@ -28,6 +25,8 @@ class ClientServersTest(unittest.TestCase):
     server, clients = self.setup_server_and_clients(8000, 1)
     self.assertTrue(clients[0].authenticate('test', 'test'))
     server.test_close()
+    for c in clients:
+      c.s.close()
 
   def test_list(self):
     # Create two accounts.
@@ -40,6 +39,8 @@ class ClientServersTest(unittest.TestCase):
     _, response = clients[0].receive_response_from_server()
     self.assertEqual(response, b'test_a,test_b') # this is better formatted in the client code (server returns as compressed as possible)
     server.test_close()
+    for c in clients:
+      c.s.close()
 
   def test_send_deliver(self):
     # Make 2 clients, with 2 accts.
@@ -62,6 +63,8 @@ class ClientServersTest(unittest.TestCase):
     self.assertEqual(messages[0], 'hello1')
     self.assertEqual(messages[1], 'hello2')
     server.test_close()
+    for c in clients:
+      c.s.close()
 
   def test_account_deletion(self):
     # Make 1 user, create acct, and then delete them.
@@ -77,6 +80,8 @@ class ClientServersTest(unittest.TestCase):
     clients[0].send_action_and_body(4, b'test_a')
     self.assertFalse(clients[0].receive_success_from_server())
     server.test_close()
+    for c in clients:
+      c.s.close()
 
 if __name__ == '__main__':
   unittest.main()
