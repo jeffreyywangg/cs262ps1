@@ -139,7 +139,7 @@ class Server:
               print(f'User {username} failed to sign up.')
 
         elif action == 2:
-          # List (no authentication required)
+          # List
           size = receive_sized_int(s, 4)
           body = receive_sized_string(s, size)
           username = self.check_authentication(s)

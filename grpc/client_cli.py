@@ -13,10 +13,16 @@ DISP_MSG = "Select from your options:" \
         "\n Enter Q to exit the application. \n\nYour choice: "
 
 class ClientCli():
+  # A `MessageServiceStub` object from GRPC for client interactions.
   client = None
+
+  # The signed-in username, or `None`.
   signed_in_user = None
+
+  # The signed-in user's token, or `None`.
   signed_in_token = None
 
+  # Starts the main loop for listening to user inputs and sending responses.
   def user_loop(self):
     valid_responses = ["H", "0", "1", "2", "3", "4", "5", "6"]
 
@@ -40,9 +46,12 @@ class ClientCli():
           if logout == "Y":
             print(f"Logging out of {self.signed_in_user}...")
             time.sleep(0.1)
+
+            # Clear the signed-in user.
             self.signed_in_user = None
             self.signed_in_token = None
 
+            # Restart the login flow.
             self.create_login_logic()
           else:
             print("Staying logged in.\n")
@@ -60,10 +69,8 @@ class ClientCli():
       elif response == "Q":
         break
 
+  # Starts the GRPC client and begins the `user_loop`.
   def main(self, host, port):
-    """Initial bootup sequence and server connect for the client.
-    """
-    # Bootup
     response: str = input("Welcome to the chat app! Press 1 to continue. Press 0 to quit. ")
     while response != "1" and response != "0":
       response: str = input("Press 1 to continue. Press 0 to quit. ")
@@ -86,14 +93,15 @@ class ClientCli():
   def get_password(self) -> str:
     return input("Enter a password: \n")
 
+  # Handles user authentication, updating state if necessary.
   def create_login_logic(self):
-    """
-    Main method to handle login logic.
-    """
-
+    # Get a username and password.
     uname = self.get_username()
     pswd = self.get_password()
+
     try:
+      # Send an authentication message to the server. If a token is returned,
+      # store it as the auth token.
       token = self.client.Authenticate(service_pb2.AuthenticateRequest(username=uname, password=pswd)).response
       if token:
         self.signed_in_user = uname
@@ -104,6 +112,7 @@ class ClientCli():
     except:
       print("Error: Unable to connect to server.")
 
+  # Deletes a user's account, resetting the auth token if necessary.
   def delete_acct(self):
     if not self.signed_in_user:
       print("You are not logged in. Please create an account or log in with Option #1.")
@@ -118,6 +127,7 @@ class ClientCli():
       self.signed_in_user = None
       self.signed_in_token = None
 
+  # Delivers messages to the current user.
   def get_messages(self):
     """
     Get undelivered messages. Action #4.
@@ -129,6 +139,7 @@ class ClientCli():
     response = self.client.Deliver(service_pb2.DeliverRequest(token=self.signed_in_token)).response
     print(response)
 
+  # Sends a message to another user.
   def send_msg(self):
     """
     Send a message. Action #3.
@@ -150,6 +161,7 @@ class ClientCli():
       error_message="Error. Unable to find account."
     )
 
+  # Lists users, optionally matching some regular expression.
   def list_users(self):
     """
     List users. Action #2.

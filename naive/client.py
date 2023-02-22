@@ -30,6 +30,10 @@ class Client():
     if size > 0:
       body = receive_sized(self.s, size)
 
+    # Action 11 is used to indicate an incoming message. If we get an action 11
+    # message, we want to store it, but then receive the next response incoming
+    # from the server, since by the time this function was called, we are expecting
+    # an action 10 response.
     if action == 11:
       self.buffered_messages.append(str(body, 'utf-8'))
       return self.receive_response_from_server()
@@ -57,11 +61,12 @@ class Client():
 
     send_sized_int(self.s, action, 1)
 
-    # Send body and/or auth token, if needed. Some methods, like one directional cli > serv communication, don't need these.
+    # Send body and/or auth token, if needed.
     if body:
       send_sized_int(self.s, len(body), 4)
       self.s.send(body)
 
+    # Some actions allow for skipping the auth token.
     if self.auth_token and not skip_auth_token:
       self.s.send(self.auth_token)
 
