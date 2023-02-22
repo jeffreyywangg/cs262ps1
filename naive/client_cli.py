@@ -174,7 +174,7 @@ class ClientCli():
     # Server request and error handling
     _, response = self.client.receive_response_from_server()
     if response:
-      print(', '.join(str(response, 'utf-8').split[','])) # no bytes wasted in wire protocol! spaces after commas added on this end.
+      print(', '.join(str(response, 'utf-8').split(','))) # no bytes wasted in wire protocol! spaces after commas added on this end.
     else:
       print('Error. Server did not handle request.')
 
