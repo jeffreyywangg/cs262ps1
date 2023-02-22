@@ -108,7 +108,7 @@ class ClientCli():
         self.signed_in_token = token
         print('Authentication successful!')
       else:
-        print('Error. Please try again. Usernames must be alphabetic.')
+        print('Error. Please try again.')
     except:
       print("Error: Unable to connect to server.")
 
