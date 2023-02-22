@@ -99,7 +99,7 @@ class ClientCli():
       self.signed_in_token = token
       print('Authentication successful!')
     else:
-      print('Error. Please try again.')
+      print('Error. Please try again. Usernames must be alphabetic.')
 
   def delete_acct(self):
     if not self.signed_in_user:
@@ -109,7 +109,8 @@ class ClientCli():
     confirm = input("You have asked to delete your account! Are you sure? Enter Y to do so, anything else to cancel. ")
     if confirm == "Y":
       self.handle_sucess_failure_response(
-        self.client.Delete(service_pb2.DeleteRequest(token=self.signed_in_token, username=self.signed_in_user))
+        self.client.Delete(service_pb2.DeleteRequest(token=self.signed_in_token, username=self.signed_in_user)),
+        error_message="Error. Unable to delete accout."
       )
       self.signed_in_user = None
       self.signed_in_token = None
@@ -142,7 +143,8 @@ class ClientCli():
     msg = input("Enter a message: \n")
     msg_format = f"{uname}:\nFROM: {self.signed_in_user}\nTO: {uname}\nMESSAGE: {msg}\n"
     self.handle_sucess_failure_response(
-      self.client.Send(service_pb2.SendRequest(token=self.signed_in_token, username=uname, body=msg_format))
+      self.client.Send(service_pb2.SendRequest(token=self.signed_in_token, username=uname, body=msg_format)),
+      error_message="Error. Unable to find account."
     )
 
   def list_users(self):
@@ -157,10 +159,10 @@ class ClientCli():
     if response:
       print(response)
     else:
-      print('Error.')
+      print('No matches found.')
 
-  def handle_sucess_failure_response(self, response):
+  def handle_sucess_failure_response(self, response, error_message="Error."):
     if response and response.success:
       print("Success!")
     else:
-      print("Error.")
+      print(error_message)

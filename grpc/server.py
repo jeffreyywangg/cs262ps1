@@ -66,7 +66,7 @@ class ServerServicer(service_pb2_grpc.MessageServiceServicer):
         pattern = re.compile(body)
         matches = []
         for uname in self.client_messages.keys():
-          if pattern.match(uname):
+          if pattern.search(uname):
             matches.append(uname)
         print('Sent usernames matching regex.')
         return service_pb2.StringResponse(success=True, response=','.join(matches))
