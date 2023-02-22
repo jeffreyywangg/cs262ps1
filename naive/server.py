@@ -56,6 +56,22 @@ class Server:
       if self.client_tokens[username] == token:
         return username
 
+  def test_close(self) -> None:
+    """
+    Closure (for unit tests). Not deployed in production.
+    """
+    to_remove = []
+
+    for s in self.sockets_watchdog:
+      s.shutdown(socket.SHUT_RDWR)
+      s.close()
+      to_remove.append(s)
+
+    self.mutex.acquire()
+    for s in to_remove:
+      del self.sockets_watchdog[s]
+    self.mutex.release()
+
   def watchdog(self) -> None:
     """
     Spawn a new thread, and poll every 5 seconds other threads for closure.
@@ -67,7 +83,7 @@ class Server:
       for s in self.sockets_watchdog:
         timediff: float = time.time() - self.sockets_watchdog[s] # time difference b/t now and last client request
 
-        if timediff > 600: # Kill threads inactive for > 600 seconds.
+        if timediff > 5: # Kill threads inactive for > 600 seconds.
           print(f"Shutting down socket {str(s)}")
           s.shutdown(socket.SHUT_RDWR)
           s.close()
@@ -80,6 +96,7 @@ class Server:
           if self.client_sockets[u] == s:
             del self.client_sockets[u]
       self.mutex.release()
+      print("released")
 
   def server_client_loop(self, s: socket.socket) -> None:
     """
@@ -248,3 +265,4 @@ class Server:
       self.sockets_watchdog[s] = time.time()
       self.mutex.release()
       threading.Thread(target=self.server_client_loop, args=(s,)).start()
+
