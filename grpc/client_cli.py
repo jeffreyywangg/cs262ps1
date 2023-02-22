@@ -93,13 +93,16 @@ class ClientCli():
 
     uname = self.get_username()
     pswd = self.get_password()
-    token = self.client.Authenticate(service_pb2.AuthenticateRequest(username=uname, password=pswd)).response
-    if token:
-      self.signed_in_user = uname
-      self.signed_in_token = token
-      print('Authentication successful!')
-    else:
-      print('Error. Please try again. Usernames must be alphabetic.')
+    try:
+      token = self.client.Authenticate(service_pb2.AuthenticateRequest(username=uname, password=pswd)).response
+      if token:
+        self.signed_in_user = uname
+        self.signed_in_token = token
+        print('Authentication successful!')
+      else:
+        print('Error. Please try again. Usernames must be alphabetic.')
+    except:
+      print("Error: Unable to connect to server.")
 
   def delete_acct(self):
     if not self.signed_in_user:
