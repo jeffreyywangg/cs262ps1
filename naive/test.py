@@ -6,7 +6,7 @@ from client import *
 class ClientServersTest(unittest.TestCase):
   """
   Unit tests for chat application. Note that logins here are orchestrated by directly obtaining the secure token
-  for a particular user/pswd. This would not be an accessible method in runtime/production. 
+  for a particular user/pswd. This would not be an accessible method in runtime/production.
   """
 
   def setup_server_and_clients(self, port, client_count):
@@ -26,18 +26,18 @@ class ClientServersTest(unittest.TestCase):
     self.assertTrue(clients[0].authenticate('test', 'test'))
 
   def test_list(self):
-    # Create two accounts. 
+    # Create two accounts.
     clients = self.setup_server_and_clients(8001, 2)
     clients[0].authenticate('test_a', 'test')
     clients[1].authenticate('test_b', 'test')
 
-    # List both accounts. 
+    # List both accounts.
     clients[0].send_action_and_body(2, b'\n')
     _, response = clients[0].receive_response_from_server()
     self.assertEqual(response, b'test_a,test_b') # this is better formatted in the client code (server returns as compressed as possible)
 
   def test_send_deliver(self):
-    # Make 2 clients, with 2 accts. 
+    # Make 2 clients, with 2 accts.
     clients = self.setup_server_and_clients(8002, 2)
     clients[0].authenticate('test_a', 'test')
     clients[1].authenticate('test_b', 'test')
@@ -49,7 +49,7 @@ class ClientServersTest(unittest.TestCase):
     clients[0].send_action_and_body(3, b'test_b:hello2')
     self.assertTrue(clients[0].receive_success_from_server())
 
-    # Get messages back and forth. 
+    # Get messages back and forth.
     clients[1].send_action_and_body(4, b'test_b')
     self.assertTrue(clients[1].receive_success_from_server())
     messages = clients[1].flush_messages()
@@ -58,26 +58,18 @@ class ClientServersTest(unittest.TestCase):
     self.assertEqual(messages[1], 'hello2')
 
   def test_account_deletion(self):
-    # Make 1 user, create acct, and then delete them. 
-    print("HELLO1")
+    # Make 1 user, create acct, and then delete them.
     clients = self.setup_server_and_clients(8003, 1)
     clients[0].authenticate('test_a', 'test')
     clients[0].send_action_and_body(5, b'test_a')
     self.assertTrue(clients[0].receive_success_from_server())
-    print("HELLO2")
-    # Now try to send messages / get messages and expect fail. 
+
+    # Now try to send messages / get messages and expect fail.
     clients[0].send_action_and_body(3, b'hello, world')
     self.assertFalse(clients[0].receive_success_from_server())
-    print("HELLO3")
+
     clients[0].send_action_and_body(4, b'test_a')
     self.assertFalse(clients[0].receive_success_from_server())
-
-  # def account_toggle(self):
-  #   pass
-    # Make 2 clients, with 2 accts. 
-    # clients = self.setup_server_and_clients(8002, 2)
-    # clients[0].authenticate('test_a', 'test')
-    # clients[1].authenticate('test_b', 'test')
 
 if __name__ == '__main__':
   unittest.main()
