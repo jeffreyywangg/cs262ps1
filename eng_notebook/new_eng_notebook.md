@@ -96,12 +96,18 @@ There are two core actions the server performs: confirming the success of a clie
 
 ## Action Codes
 
-> TODO MARCO
+Each message sent between the client and the server has a corresponding code, representedas a single byte, that indicates the type of the message. These codes are explained as follows:
 
-Client | Code | Action |
------------- | ------------ | ------------ |
-0 | A | B |
-1 | B | C |
+Code | Action | Body
+---
+1 | Authenticate | Username and password, colon-separated
+2 | List users | Regex search or newline for all matches
+3 | Send message | Username and message body, colon-separated
+4 | Manually fetch messages | Username to deliver messages to
+5 | Delete account  | Username to delete account for
+10 (server to client) | Response to a client-initiated action, such as the list of active users for action 2 or the zero byte for action 3 | Response body from server
+11 (server to client) | Incoming message  | Incoming message text
+
 
 ## Separation of Concerns (Important)
 
