@@ -7,6 +7,22 @@ There are only three dependencies:
 - grpcio
 - protobuf
 
+You should install these manually, but you may try these:
+
+### Conda
+
+```
+conda env create -f environment.yml
+conda activate cs262ps1
+```
+
+### Pip
+
+Create a virtual environment, then run:
+```
+pip install -r requirements.txt
+```
+
 # Design Notes
 
 As we began considering this project, we began by outlining a list of design questions, in addition to the functionality built in the spec, as guiding principles for our implementations.
