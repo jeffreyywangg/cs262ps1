@@ -158,11 +158,15 @@ class ClientCli():
     request_search = regex
     if len(regex) == 0:
       request_search = "\n"
-    response = self.client.List(service_pb2.ListRequest(token=self.signed_in_token, request=request_search)).response
-    if response:
-      print(response)
-    else:
-      print('No matches found.')
+
+    try:
+      response = self.client.List(service_pb2.ListRequest(token=self.signed_in_token, request=request_search)).response
+      if response:
+        print(response)
+      else:
+        print('No matches found.')
+    except:
+      print("Error: Unable to connect to server.")
 
   def handle_sucess_failure_response(self, response, error_message="Error."):
     if response and response.success:
