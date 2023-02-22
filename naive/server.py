@@ -107,7 +107,7 @@ class Server:
 
           if username in self.client_messages: # If user exists already...
             if self.client_passwords[username] == password:
-              for other_username in self.client_sockets:
+              for other_username in list(self.client_sockets):
                 if self.client_sockets[other_username] == s:
                   del self.client_sockets[other_username]
               self.client_sockets[username] = s
@@ -119,7 +119,7 @@ class Server:
           else: # If user DNE
             if re.match('^[a-z_]+$', username) and len(password) > 0: # valid usernames must be alphabetical
               self.mutex.acquire()
-              for other_username in self.client_sockets:
+              for other_username in list(self.client_sockets):
                 if self.client_sockets[other_username] == s:
                   del self.client_sockets[other_username]
               self.client_sockets[username] = s
