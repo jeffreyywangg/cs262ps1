@@ -164,6 +164,11 @@ class ClientCli():
     """
     List users. Action #2.
     """
+    # Check permissions
+    if not self.signed_in_user:
+      print("You are not logged in. Please create an account or log in with Option #1.")
+      return
+
     # User prompt
     regex = input("Do you wish to list usernames that match a regex? If so, enter one; if not, hit return. \n")
     if len(regex) == 0:
