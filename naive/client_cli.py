@@ -23,6 +23,10 @@ class ClientCli():
     firstTime = True  # display DISP_MSG for the first time, and after that only when prompted.
 
     while True:
+      if self.signed_in_user:
+        self.client.send_action_and_body(4, bytes(self.signed_in_user, 'utf-8'))
+        self.handle_sucess_failure(action=4)
+
       print('\n\n'.join(self.client.flush_messages()))
       response = None # user response
 
