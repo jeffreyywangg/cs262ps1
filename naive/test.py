@@ -84,4 +84,4 @@ class ClientServersTest(unittest.TestCase):
       c.s.close()
 
 if __name__ == '__main__':
-  unittest.main()
+  unittest.main(buffer=True)

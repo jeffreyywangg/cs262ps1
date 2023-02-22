@@ -83,7 +83,7 @@ class Server:
       for s in self.sockets_watchdog:
         timediff: float = time.time() - self.sockets_watchdog[s] # time difference b/t now and last client request
 
-        if timediff > 5: # Kill threads inactive for > 600 seconds.
+        if timediff > 600: # Kill threads inactive for > 600 seconds.
           print(f"Shutting down socket {str(s)}")
           s.shutdown(socket.SHUT_RDWR)
           s.close()
