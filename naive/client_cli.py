@@ -154,7 +154,7 @@ class ClientCli():
 
     # Get message
     msg = input("Enter a message: \n")
-    msg_format = f"{uname}:FROM: {self.signed_in_user}\nTO: {uname}\n\nMESSAGE: {msg}\n"
+    msg_format = f"{uname}:\nFROM: {self.signed_in_user}\nTO: {uname}\nMESSAGE: {msg}\n"
 
     # Server request and error handling
     self.client.send_action_and_body(3, bytes(msg_format, 'utf-8'))
@@ -181,7 +181,7 @@ class ClientCli():
     if response:
       print(', '.join(str(response, 'utf-8').split(','))) # no bytes wasted in wire protocol! spaces after commas added on this end.
     else:
-      print('Error. Server did not handle request.')
+      print('No matches found.')
 
   def handle_sucess_failure(self, action):
     """

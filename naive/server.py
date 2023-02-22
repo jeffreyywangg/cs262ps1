@@ -151,7 +151,7 @@ class Server:
               pattern = re.compile(body)
               matches = []
               for uname in self.client_messages.keys():
-                if pattern.match(uname):
+                if pattern.search(uname):
                   matches.append(uname)
               self.send_body(s, 10, bytes(','.join(matches), 'utf-8'))
               print('Sent usernames matching regex.')
