@@ -17,4 +17,4 @@ else:
     server.start(args.port)
   else:
     cli = ClientCli()
-    cli.main(args.host, 8013)
+    cli.main(args.host, args.port)
