@@ -1,0 +1,52 @@
+15:52:06.109640 IP localhost.50902 > localhost.8013: Flags [S], seq 2768083567, win 65535, options [mss 16344,nop,wscale 6,nop,nop,TS val 2361436937 ecr 0,sackOK,eol], length 0
+15:52:06.109656 IP localhost.50902 > localhost.8013: Flags [S], seq 2768083567, win 65535, options [mss 16344,nop,wscale 6,nop,nop,TS val 2361436937 ecr 0,sackOK,eol], length 0
+15:52:06.109729 IP localhost.8013 > localhost.50902: Flags [S.], seq 53651673, ack 2768083568, win 65535, options [mss 16344,nop,wscale 6,nop,nop,TS val 1922145780 ecr 2361436937,sackOK,eol], length 0
+15:52:06.109732 IP localhost.8013 > localhost.50902: Flags [S.], seq 53651673, ack 2768083568, win 65535, options [mss 16344,nop,wscale 6,nop,nop,TS val 1922145780 ecr 2361436937,sackOK,eol], length 0
+15:52:06.109740 IP localhost.50902 > localhost.8013: Flags [.], ack 1, win 6379, options [nop,nop,TS val 2361436937 ecr 1922145780], length 0
+15:52:06.109741 IP localhost.50902 > localhost.8013: Flags [.], ack 1, win 6379, options [nop,nop,TS val 2361436937 ecr 1922145780], length 0
+15:52:06.109746 IP localhost.8013 > localhost.50902: Flags [.], ack 1, win 6379, options [nop,nop,TS val 1922145780 ecr 2361436937], length 0
+15:52:06.109747 IP localhost.8013 > localhost.50902: Flags [.], ack 1, win 6379, options [nop,nop,TS val 1922145780 ecr 2361436937], length 0
+15:52:12.963177 IP localhost.50902 > localhost.8013: Flags [P.], seq 1:2, ack 1, win 6379, options [nop,nop,TS val 2361443790 ecr 1922145780], length 1
+15:52:12.963193 IP localhost.50902 > localhost.8013: Flags [P.], seq 1:2, ack 1, win 6379, options [nop,nop,TS val 2361443790 ecr 1922145780], length 1
+15:52:12.963206 IP localhost.8013 > localhost.50902: Flags [.], ack 2, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 0
+15:52:12.963211 IP localhost.8013 > localhost.50902: Flags [.], ack 2, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 0
+15:52:12.963217 IP localhost.50902 > localhost.8013: Flags [P.], seq 2:14, ack 1, win 6379, options [nop,nop,TS val 2361443790 ecr 1922152633], length 12
+15:52:12.963218 IP localhost.50902 > localhost.8013: Flags [P.], seq 2:14, ack 1, win 6379, options [nop,nop,TS val 2361443790 ecr 1922152633], length 12
+15:52:12.963220 IP localhost.8013 > localhost.50902: Flags [.], ack 14, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 0
+15:52:12.963221 IP localhost.8013 > localhost.50902: Flags [.], ack 14, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 0
+15:52:12.963844 IP localhost.8013 > localhost.50902: Flags [P.], seq 1:2, ack 14, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 1
+15:52:12.963860 IP localhost.8013 > localhost.50902: Flags [P.], seq 1:2, ack 14, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 1
+15:52:12.963872 IP localhost.50902 > localhost.8013: Flags [.], ack 2, win 6379, options [nop,nop,TS val 2361443790 ecr 1922152633], length 0
+15:52:12.963876 IP localhost.50902 > localhost.8013: Flags [.], ack 2, win 6379, options [nop,nop,TS val 2361443790 ecr 1922152633], length 0
+15:52:12.963882 IP localhost.8013 > localhost.50902: Flags [P.], seq 2:23, ack 14, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 21
+15:52:12.963885 IP localhost.8013 > localhost.50902: Flags [P.], seq 2:23, ack 14, win 6379, options [nop,nop,TS val 1922152633 ecr 2361443790], length 21
+15:52:12.963886 IP localhost.50902 > localhost.8013: Flags [.], ack 23, win 6379, options [nop,nop,TS val 2361443790 ecr 1922152633], length 0
+15:52:12.963887 IP localhost.50902 > localhost.8013: Flags [.], ack 23, win 6379, options [nop,nop,TS val 2361443790 ecr 1922152633], length 0
+15:52:16.739066 IP localhost.50902 > localhost.8013: Flags [P.], seq 14:15, ack 23, win 6379, options [nop,nop,TS val 2361447566 ecr 1922152633], length 1
+15:52:16.739080 IP localhost.50902 > localhost.8013: Flags [P.], seq 14:15, ack 23, win 6379, options [nop,nop,TS val 2361447566 ecr 1922152633], length 1
+15:52:16.739095 IP localhost.8013 > localhost.50902: Flags [.], ack 15, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 0
+15:52:16.739101 IP localhost.8013 > localhost.50902: Flags [.], ack 15, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 0
+15:52:16.739111 IP localhost.50902 > localhost.8013: Flags [P.], seq 15:37, ack 23, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 22
+15:52:16.739113 IP localhost.50902 > localhost.8013: Flags [P.], seq 15:37, ack 23, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 22
+15:52:16.739117 IP localhost.8013 > localhost.50902: Flags [.], ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 0
+15:52:16.739118 IP localhost.8013 > localhost.50902: Flags [.], ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 0
+15:52:16.739206 IP localhost.8013 > localhost.50902: Flags [P.], seq 23:24, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 1
+15:52:16.739214 IP localhost.8013 > localhost.50902: Flags [P.], seq 23:24, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 1
+15:52:16.739222 IP localhost.50902 > localhost.8013: Flags [.], ack 24, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739225 IP localhost.50902 > localhost.8013: Flags [.], ack 24, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739240 IP localhost.8013 > localhost.50902: Flags [P.], seq 24:25, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 1
+15:52:16.739244 IP localhost.8013 > localhost.50902: Flags [P.], seq 24:25, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 1
+15:52:16.739248 IP localhost.50902 > localhost.8013: Flags [.], ack 25, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739249 IP localhost.50902 > localhost.8013: Flags [.], ack 25, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739256 IP localhost.8013 > localhost.50902: Flags [P.], seq 25:29, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 4
+15:52:16.739259 IP localhost.8013 > localhost.50902: Flags [P.], seq 25:29, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 4
+15:52:16.739262 IP localhost.50902 > localhost.8013: Flags [.], ack 29, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739264 IP localhost.50902 > localhost.8013: Flags [.], ack 29, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739270 IP localhost.8013 > localhost.50902: Flags [P.], seq 29:34, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 5
+15:52:16.739281 IP localhost.8013 > localhost.50902: Flags [P.], seq 29:34, ack 37, win 6379, options [nop,nop,TS val 1922156409 ecr 2361447566], length 5
+15:52:16.739289 IP localhost.50902 > localhost.8013: Flags [.], ack 34, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:16.739291 IP localhost.50902 > localhost.8013: Flags [.], ack 34, win 6379, options [nop,nop,TS val 2361447566 ecr 1922156409], length 0
+15:52:18.650622 IP localhost.50902 > localhost.8013: Flags [F.], seq 37, ack 34, win 6379, options [nop,nop,TS val 2361449478 ecr 1922156409], length 0
+15:52:18.650639 IP localhost.50902 > localhost.8013: Flags [F.], seq 37, ack 34, win 6379, options [nop,nop,TS val 2361449478 ecr 1922156409], length 0
+15:52:18.650656 IP localhost.8013 > localhost.50902: Flags [.], ack 38, win 6379, options [nop,nop,TS val 1922158321 ecr 2361449478], length 0
+15:52:18.650659 IP localhost.8013 > localhost.50902: Flags [.], ack 38, win 6379, options [nop,nop,TS val 1922158321 ecr 2361449478], length 0
