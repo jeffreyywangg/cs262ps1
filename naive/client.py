@@ -43,7 +43,7 @@ class Client():
     _, body = self.receive_response_from_server()
     return body is not None
 
-  def send_action_and_body(self, action, body=None):
+  def send_action_and_body(self, action, body=None, skip_auth_token=False):
     """
     Client-specific method to send an action (with a body, if needed).
     """
@@ -62,14 +62,14 @@ class Client():
       send_sized_int(self.s, len(body), 4)
       self.s.send(body)
 
-    if self.auth_token:
+    if self.auth_token and not skip_auth_token:
       self.s.send(self.auth_token)
 
   def authenticate(self, username: str, password: str) -> None:
     """
     Get authentication token for username/password, to ensure current session working.
     """
-    self.send_action_and_body(1, bytes(username + ':' + password, 'utf-8'))
+    self.send_action_and_body(1, bytes(username + ':' + password, 'utf-8'), True)
     response_action, response_body = self.receive_response_from_server()
     self.auth_token = response_body
     return self.auth_token is not None

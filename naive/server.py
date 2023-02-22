@@ -137,6 +137,7 @@ class Server:
           # List (no authentication required)
           size = receive_sized_int(s, 4)
           body = receive_sized_string(s, size)
+          username = self.check_authentication(s)
 
           if not username:
             self.send_error(s, 10)
