@@ -140,7 +140,7 @@ class ClientCli():
       satisfied = input(f"You will send a message to {uname}. If you want to re-enter, enter 1. Otherwise, if satisfied, enter anything else. ")
 
     msg = input("Enter a message: \n")
-    msg_format = f"{uname}:FROM: {self.signed_in_user}\nTO: {uname}\n\nMESSAGE: {msg}\n"
+    msg_format = f"{uname}:\nFROM: {self.signed_in_user}\nTO: {uname}\nMESSAGE: {msg}\n"
     self.handle_sucess_failure_response(
       self.client.Send(service_pb2.SendRequest(token=self.signed_in_token, username=uname, body=msg_format))
     )
