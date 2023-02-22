@@ -2,10 +2,6 @@
 
 ## Installation & Setup
 
-We offer multiple installation modalities:
-
-## Installation & Setup
-
 There are only three dependencies:
 - Python 3.8+ (3.7 should work too)
 - grpcio
@@ -96,7 +92,7 @@ There are two core actions the server performs: confirming the success of a clie
 
 ## Action Codes
 
-Each message sent between the client and the server has a corresponding code, representedas a single byte, that indicates the type of the message. These codes are explained as follows:
+Each message sent between the client and the server has a corresponding code, represented as a single byte, that indicates the type of the message. These codes are explained as follows:
 
 Code | Action | Body
 ---|---|---
