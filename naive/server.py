@@ -8,12 +8,23 @@ from wireprotocol import *
 from typing import Tuple, Dict, List
 
 class Server:
-  mutex = Lock()                                      # mutex for editing any server data (dictionaries below)
-  client_messages: Dict[str, List[str]] = {}          # {uname: [msg1, msg2, ...]}
-  client_passwords: Dict[str, str] = {}               # {uname: pswd}
-  client_tokens: Dict[str, bytes] = {}                # {uname: auth_token}
-  client_sockets: Dict[str, socket.socket] = {}       # {uname: socket}
-  sockets_watchdog: Dict[socket.socket, float] = {}   # {socket: time_since_last_ping}
+  # A mutex used to syncronize edits to state.
+  mutex = Lock()
+
+  # A map of usernames to undelivered messages
+  client_messages: Dict[str, List[str]] = {}
+
+  # A map of usernames to passwords, used for initial authentication.
+  client_passwords: Dict[str, str] = {}
+
+  # A map of usernames to auth tokens.
+  client_tokens: Dict[str, bytes] = {}
+
+  # A map of usernames to sockets, used for delivering messages.
+  client_sockets: Dict[str, socket.socket] = {}
+
+  # A map of sockets to the last time that a message was received on that socket.
+  sockets_watchdog: Dict[socket.socket, float] = {}
 
   def send_body(self, s: socket.socket, action: int, body: int) -> None:
     """
@@ -89,6 +100,7 @@ class Server:
           s.close()
           to_remove.append(s)
 
+      # Next, close any sockets that were marked as to remove.
       self.mutex.acquire()
       for r in to_remove:
         del self.sockets_watchdog[r]
@@ -108,6 +120,7 @@ class Server:
       version = receive_sized_int(s, 1)
       print('Incoming action...')
 
+      # Update the watchdog time for this socket.
       self.mutex.acquire()
       self.sockets_watchdog[s] = time.time()
       self.mutex.release()
@@ -140,9 +153,13 @@ class Server:
           else: # If user DNE
             if re.match('^[a-z_]+$', username) and len(password) > 0: # valid usernames must be alphabetical
               self.mutex.acquire()
+              # Remove any other usernames tied to this socket, such as
+              # if the user signed out and signed in again on the same socket.
               for other_username in list(self.client_sockets):
                 if self.client_sockets[other_username] == s:
                   del self.client_sockets[other_username]
+
+              # Create new keys in the state dictionaries
               self.client_sockets[username] = s
               self.client_messages[username] = []
               self.client_passwords[username] = password
@@ -198,6 +215,7 @@ class Server:
             self.mutex.acquire()
             self.client_messages[username].append(text)
 
+            # If they have an active socket, we want to send those messages.
             if username in self.client_sockets:
               for message in self.client_messages[username]:
                 print(f'Delivering message to {username}.')
@@ -205,6 +223,8 @@ class Server:
               self.client_messages[username] = []
 
             self.mutex.release()
+
+            # Send the zero byte to indicate success.
             self.send_body(s, 10, ZERO_BYTE)
             print('Sent message.')
         elif action == 4:
@@ -220,6 +240,7 @@ class Server:
           if body not in self.client_messages:
             self.send_error(s, 10)
           else:
+            # If they have an active socket, we want to send the messages.
             for message in self.client_messages[body]:
               if body in self.client_sockets:
                 print(f'Delivering message to {body}.')
@@ -229,6 +250,7 @@ class Server:
             self.client_messages[body] = []
             self.mutex.release()
 
+            # Send the zero byte to indicate success.
             self.send_body(s, 10, ZERO_BYTE)
             print('Delivered messages.')
         elif action == 5:
