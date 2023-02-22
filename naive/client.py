@@ -76,20 +76,20 @@ class Client():
 
   def deauthenticate(self) -> None:
     """
-    Get rid of secure token for a particular user (called when logging out). 
+    Get rid of secure token for a particular user (called when logging out).
     """
     self.auth_token = None
 
   def run(self, host, port):
     """
-    Build socket and run. 
+    Build socket and run.
     """
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.connect((host, port))
 
   def flush_messages(self) -> None:
     """
-    Return buffered messages for display. 
+    Return buffered messages for display.
     """
     temp_messages = self.buffered_messages
     self.buffered_messages = []

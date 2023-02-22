@@ -20,7 +20,7 @@ class ClientCli():
 
   def user_loop(self):
 
-    firstTime = True  # display DISP_MSG for the first time, and after that only when prompted. 
+    firstTime = True  # display DISP_MSG for the first time, and after that only when prompted.
 
     while True:
       print('\n\n'.join(self.client.flush_messages()))
@@ -29,19 +29,20 @@ class ClientCli():
       if firstTime: # display full query
         firstTime = False
         response = self.user_query()
-      else: # display shortened query             
+      else: # display shortened query
         disp_msg = "Take your next action. Press H to get the directions again. "
         response = self.user_query(disp_msg)
 
       if response == "H": # display DISP_MSG
         firstTime = True
         continue
-      
-      elif response == "0" or response == "1": # Create account or sign in. 
+
+      elif response == "0" or response == "1": # Create account or sign in.
         if self.signed_in_user:
           logout = self.logout_confirm()
           if logout == "Y":
             print(f"Logging out of {self.signed_in_user}...")
+            self.client.deauthenticate()
             time.sleep(0.1)
             self.signed_in_user = None
 
@@ -51,9 +52,9 @@ class ClientCli():
             continue
         else:
           self.create_login_logic()
-      elif response == "2": 
+      elif response == "2":
         self.list_users()
-      elif response == "3": 
+      elif response == "3":
         self.send_msg()
       elif response == "4":
         self.get_messages()
@@ -101,23 +102,23 @@ class ClientCli():
     uname = self.get_username()
     pswd = self.get_password()
 
-    # Server request and error handling 
+    # Server request and error handling
     if self.client.authenticate(uname, pswd):
       self.signed_in_user = uname
       print('Authentication successful!')
     else:
       print('Error. Please try again. Usernames must be alphabetical; passwords len > 0.')
-  
+
   def delete_acct(self) -> None:
     """
-    Delete account. Confirms action and sends message to server. Action #5. 
+    Delete account. Confirms action and sends message to server. Action #5.
     """
     # Check permissions permissions
     if not self.signed_in_user:
       print("You are not logged in. Please create an account or log in with Option #1.")
       return
 
-    # Server request and error handling 
+    # Server request and error handling
     confirm = input("You have asked to delete your account! Are you sure? Enter `Yes` to do so. ")
     if confirm == "Yes":
       self.client.send_action_and_body(5, bytes(self.signed_in_user, 'utf-8'))
@@ -131,7 +132,7 @@ class ClientCli():
       print("You are not logged in. Please create an account or log in with Option #1.\n")
       return
 
-    # Server request and error handling 
+    # Server request and error handling
     self.client.send_action_and_body(4, bytes(self.signed_in_user, 'utf-8'))
     self.handle_sucess_failure(action=4)
 
@@ -151,11 +152,11 @@ class ClientCli():
       uname = input("Enter a username: \n")
       satisfied = input(f"You will send a message to {uname}. If you want to re-enter, enter 1. Otherwise, if satisfied, enter anything else. ")
 
-    # Get message 
+    # Get message
     msg = input("Enter a message: \n")
     msg_format = f"{uname}:FROM: {self.signed_in_user}\nTO: {uname}\n\nMESSAGE: {msg}\n"
 
-    # Server request and error handling 
+    # Server request and error handling
     self.client.send_action_and_body(3, bytes(msg_format, 'utf-8'))
     self.handle_sucess_failure(action=3)
 
@@ -169,18 +170,18 @@ class ClientCli():
       self.client.send_action_and_body(2, bytes("\n", 'utf-8'))
     else:
       self.client.send_action_and_body(2, bytes(regex, 'utf-8'))
-    
-    # Server request and error handling 
+
+    # Server request and error handling
     _, response = self.client.receive_response_from_server()
     if response:
-      print(', '.join(str(response, 'utf-8').split[','])) # no bytes wasted in wire protocol! spaces after commas added on this end. 
+      print(', '.join(str(response, 'utf-8').split[','])) # no bytes wasted in wire protocol! spaces after commas added on this end.
     else:
       print('Error. Server did not handle request.')
 
   def handle_sucess_failure(self, action):
     """
-    Wrapper method for receiving server feedback on actions that are one-directional (client > server). 
-    E.g. deleting an account, sending a message, etc. 
+    Wrapper method for receiving server feedback on actions that are one-directional (client > server).
+    E.g. deleting an account, sending a message, etc.
     """
     if self.client.receive_success_from_server():
       if action==3:
@@ -199,7 +200,7 @@ class ClientCli():
       elif action ==5:
         print("Error. Server did not handle request. This is unusual; reach out to the server administrator.")
 
-        
+
 
 
 
