@@ -99,7 +99,7 @@ There are two core actions the server performs: confirming the success of a clie
 Each message sent between the client and the server has a corresponding code, representedas a single byte, that indicates the type of the message. These codes are explained as follows:
 
 Code | Action | Body
----
+---|---|---
 1 | Authenticate | Username and password, colon-separated
 2 | List users | Regex search or newline for all matches
 3 | Send message | Username and message body, colon-separated
