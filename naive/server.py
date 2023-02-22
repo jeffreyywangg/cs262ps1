@@ -107,6 +107,9 @@ class Server:
 
           if username in self.client_messages: # If user exists already...
             if self.client_passwords[username] == password:
+              for other_username in self.client_sockets:
+                if self.client_sockets[other_username] == s:
+                  del self.client_sockets[other_username]
               self.client_sockets[username] = s
               self.send_body(s, 10, self.client_tokens[username])
               print(f'User {username} logged in successfully.')
@@ -116,6 +119,9 @@ class Server:
           else: # If user DNE
             if re.match('^[a-z_]+$', username) and len(password) > 0: # valid usernames must be alphabetical
               self.mutex.acquire()
+              for other_username in self.client_sockets:
+                if self.client_sockets[other_username] == s:
+                  del self.client_sockets[other_username]
               self.client_sockets[username] = s
               self.client_messages[username] = []
               self.client_passwords[username] = password
