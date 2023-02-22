@@ -17,7 +17,7 @@ class Server:
 
   def send_body(self, s: socket.socket, action: int, body: int) -> None:
     """
-    Send a message via wire protocol to client. 
+    Send a message via wire protocol to client.
     """
 
     try:    # Send version #
@@ -34,7 +34,7 @@ class Server:
   def send_error(self, s: socket.socket, action: int) -> None:
     """
     Server-specific method to send that an error occurred to the client.
-    Same as send_body except sends a zero int. 
+    Same as send_body except sends a zero int.
     """
     try:    # Send version #
       send_sized_int(s, 0, 1)
@@ -47,7 +47,7 @@ class Server:
 
   def check_authentication(self, s: socket.socket) -> None:
     """
-    Check if user authentication token correct (for secure/pswd-protected features). 
+    Check if user authentication token correct (for secure/pswd-protected features).
     """
     token = receive_sized(s, 16)
     for username in self.client_tokens:
@@ -56,7 +56,7 @@ class Server:
 
   def watchdog(self) -> None:
     """
-    Spawn a new thread, and poll every 5 seconds other threads for closure. 
+    Spawn a new thread, and poll every 5 seconds other threads for closure.
     Note that sockets_watchdog maintains the last connection by thread to server.
     """
     while True:
@@ -78,7 +78,7 @@ class Server:
 
   def server_client_loop(self, s: socket.socket) -> None:
     """
-    Main server/client logic. 
+    Main server/client logic.
     """
     while True:
       if s not in self.sockets_watchdog:
@@ -169,6 +169,13 @@ class Server:
           else:
             self.mutex.acquire()
             self.client_messages[username].append(text)
+
+            if username in self.client_sockets:
+              for message in self.client_messages[username]:
+                print(f'Delivering message to {username}.')
+                self.send_body(self.client_sockets[username], 11, bytes(message, 'utf-8'))
+              self.client_messages[username] = []
+
             self.mutex.release()
             self.send_body(s, 10, ZERO_BYTE)
             print('Sent message.')
