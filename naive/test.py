@@ -72,4 +72,4 @@ class ClientServersTest(unittest.TestCase):
     self.assertFalse(clients[0].receive_success_from_server())
 
 if __name__ == '__main__':
-  unittest.main()
+  unittest.main(buffer=True)

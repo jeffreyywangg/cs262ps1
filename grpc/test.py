@@ -62,4 +62,4 @@ class ClientServersTest(unittest.TestCase):
     self.assertEqual(response.response, 'hello1\n\nhello2')
 
 if __name__ == '__main__':
-  unittest.main()
+  unittest.main(buffer=True)
