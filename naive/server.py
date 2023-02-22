@@ -85,7 +85,7 @@ class Server:
         return
 
       version = receive_sized_int(s, 1)
-      print('Incoming message...')
+      print('Incoming action...')
 
       self.mutex.acquire()
       self.sockets_watchdog[s] = time.time()
