@@ -25,6 +25,7 @@ class Server:
     except: # If client terminates connection suddenly
       print("ERROR - Connection lost to client.")
       del self.sockets_watchdog[s]
+      return
 
     # Send action, length of body, and body.
     send_sized_int(s, action, 1)
@@ -41,6 +42,7 @@ class Server:
     except: # If client terminates connection suddenly
       print("ERROR - Connection lost to client.")
       del self.sockets_watchdog[s]
+      return
 
     send_sized_int(s, action, 1)
     send_sized_int(s, 0, 4)
@@ -74,6 +76,9 @@ class Server:
       self.mutex.acquire()
       for r in to_remove:
         del self.sockets_watchdog[r]
+        for u in list(self.client_sockets):
+          if self.client_sockets[u] == s:
+            del self.client_sockets[u]
       self.mutex.release()
 
   def server_client_loop(self, s: socket.socket) -> None:
