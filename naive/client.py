@@ -38,7 +38,7 @@ class Client():
 
   def receive_success_from_server(self):
     """
-    Get server response for action that requires no response.
+    Get server response for action that requires no response. (Confirms byte delivery and exits)
     """
     _, body = self.receive_response_from_server()
     return body is not None
