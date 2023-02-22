@@ -1,28 +1,12 @@
 # CS 262 Chat Application Engineering Notebook
 
-# TODO
-
 ## Installation & Setup
 
 We offer multiple installation modalities:
 
-### Conda
+## Installation & Setup
 
-```
-conda env create -f environment.yml
-conda activate cs262ps1
-```
-
-### Pip
-
-Create a virtual environment, then run:
-```
-pip install -r requirements.txt
-```
-
-### Manual Installation
-
-If you prefer an alternate method of installation, these are the dependencies:
+There are only three dependencies:
 - Python 3.8+ (3.7 should work too)
 - grpcio
 - protobuf
@@ -35,7 +19,7 @@ The spec as-is is fairly functional. However, one key flaw (in our eyes) is that
 
 ## Passwords
 
-While the server is running, we want to keep user experiences mroe secure. To that end, we use passwords.
+While the server is running, we want to keep user experiences more secure. To that end, we use passwords.
 
 **The First Implementation**
 
@@ -104,13 +88,15 @@ All strings are formatted in `utf-8`, where each character is 1-4 bytes.
 
 There are **two core layers of actions**: 1) those that require a body, and 2) those that are privileged.
 
-Some client > server requests have a body, like sending a message or creating an account/logging in. These will have a 4-byte integer for the size of the body, followed by the body itself (so the server knows *precisely* how much to read). Others actions don't have a body, like requesting a list of usernames. These will have a single-byte "0" for the action number (see `wire_protocol/ZERO_BYTE`).
+Some client > server requests have a body, like sending a message or creating an account/logging in. These will have a 4-byte integer for the size of the body, followed by the body itself (so the server knows *precisely* how much to read).
 
-Some client > server requests require authentication, like sending a message (which needs a message body) or deleting an account (which doesn't need a message body). After reading the body, depending on what action the client tries to take, the server will check for authentication if necessary. This will be a 16-byte secure randomized token given to the client upon creating an account or logging in.
+Some client > server requests require authentication, like sending a message (which needs a message body) or deleting an account (which doesn't need a message body). After reading the body, depending on what action the client tries to take, the server will check for authentication. This will be a 16-byte secure randomized token given to the client upon creating an account or logging in (and stored on the server side).
 
 There are two core actions the server performs: confirming the success of a client action (log in, account deletion, etc.) or 2) returning information to the client. There are methods for both.
 
 ## Action Codes
+
+> TODO MARCO
 
 Client | Code | Action |
 ------------ | ------------ | ------------ |
@@ -121,17 +107,15 @@ Client | Code | Action |
 
 An important design aspect of our naive implementation is separation of concerns between server and client. An easy pitfall to fall into with the wire protocol is to perform all application logic on the server side and overload strings when returning messages back to the client. To that end, we only transfer data when **explicitly requested**; all error handling and string parsing is done on the client side.
 
-> **This mini
-
-For instance, when undelivered messages are requested, they are sent back. However, if a client tries to log in with an incorrect password, the server only returns an error token and error message handling is done on the client side.
+For instance, when undelivered messages are requested, they are sent back. However, if a client tries to log in with an incorrect password, the server only returns an error token and error message handling is done on the client side. Importantly, we don't perform UX processing on the server side.
 
 ## Message Buffering
 
-We considered two solutions to real-time message delivery:
+We considered two solutions to real-time message delivery for those already logged in:
 
-The first was to keep a background thread pulling messages, "buffering" those messages until the next time the client is available (e.g. not typing in a command), and delivering.
+**First Solution**: The first was to keep a background thread pulling messages, "buffering" those messages until the next time the client is available (e.g. not typing in a command), and delivering. This is a "streaming"-type solution, which we planned to implement by peaking into the socket with the `MSG_PEEK` flag. However, this is somewhat difficult in practice because any errors in buffering bytes (e.g. accidentally reading in another type of message, being off by one, etc.) can be catastrophic.
 
-Functionally, however, this just waits until the client has made some command line interaction and then drops in the messages. Instead, we pull for messages each time the client interacts with the command line and display any if they are queued. This is slightly more packet calls but substantively easier to implement.
+**Final Solution**: Functionally, however, the above solution just waits until the client has made some command line interaction and then drops in the messages. Instead, we pull for messages each time the client interacts with the command line and display any if they are queued. This is slightly more server calls but substantively easier to implement.
 
 ## Unit Tests
 
@@ -141,40 +125,35 @@ We sought to design unit tests that would isolate and test the functionality of 
 - Sending and delivering messages
 - Account deletion
 
+## Watchdog: Handling Multiple Connections
+
+Our server spawns a new thread for each incoming connection. As sockets time out, we have a separate "watchdog" thread that monitors sockets that haven't been used and closes them after a certain period of time, along with their corresponding thread.
+
 ## Error Handling
 
-Our server spawns a new thread for each incoming connection. To handle client/server failures or timeouts, we implemented the following behavior:
-
-> All of this is true to my knowledge only for naive (dk about GRPC)
+To handle client/server failures or timeouts, we implemented the following behavior:
 
 Behavior | Client: Timeout | Client: Volunteer Exit | Client: Crash
 ------------ | ------------ | ------------ | -------------
-Server | Watchdog closes socket connection + thread. If client side tries to connect again, exception caught. | I think the server socket just times out and then the server closes it. But there should be a message sent to just auto-close. | Unclear (I think the server will just close it after 600 seconds?)
+Server | The server watchdog closes socket connection + thread. If client side tries to connect again, exception caught. | Functionally equivalent to a timeout. The client exits the CLI, causing their socket connection to grow stale. After a certain period of time, the server closes it and cleans up. | Same as the other two.
 
-Behavior | Server: Timeout | Server: Volunteer Exit | Server: Crash
------------- | ------------ | ------------ | -------------
-Client | The client just hangs. | Not implemented. | I think this gets caught in a try/except (e.g. if the socket is broken then it's caught).
+Notably, the server behavior when encountering different client "endings" is all the same. We decided to let the server simply do "garbage collection" because our client timeout period is short (O(1) minutes). In the future, we might add a "exit" call from the client on a voluntary exit rather than letting it also be swept up by the watchdog.
 
-> TODO, JEFF: Add more detail here.
+Behavior | Server: Timeout | Server: Crash
+------------ | ------------ | -------------
+Client | The client CLI hangs. It has no conception of whether the lag is caused by prolonged request processing or network latency. The user may consider restarting their application. | If the client attempts to read out of a closed socket, it gets caught in a try/except. They are told that connection was lost to the server.
 
-## Drawbacks/Improvements For The Future
+## Improvements For The Future
 
-> Passwords, accounts, etc. are wiped out when the server instance stops running. A more robust version of our application would store the data in some permanent memory.
+To improve in the future, we would consider a few more robustness improvements on the server side:
+- Persistent memory. Since Jim said that this application didn't need to have a database and could store everything in memory, that is what we do. However, it would make more sense at some point to introduce persistent memory so that passwords/accounts/etc are not completely wiped out when a server instance stops running.
+- Graceful exits. In a live application, the servers sometimes need to be taken down for maintenance. In this case, creating a server call that can gracefully close all client connections and shut itself down would be useful.
 
 # GRPC
 
 We also used GRPC to handle the wire protocol. Below, we describe differences in GRPC vs naive from an empirical and theoretical perspective.
 
-## Error Handling
-
-We can generally consider GRPC as a black box.
-We added two try/excepts
-
-> TODO JEFF
-
 ## GRPC vs Naive Implementation
-
-> TODO JEFF
 
 ### Packet Sizes
 
@@ -195,6 +174,10 @@ Non-0 packet count | 20 | 30
 
 As shown above, our naïve implementation uses both fewer and smaller packets. Intuitively, this makes sense, as our wire protocol was designed to use the minimum number of bytes possible to reasonably convey the given information, while the GRPC functionality for each message likely extends beyonds the needs of this project. In other words, while GRPC allows for more flexibility and a robust protobuf-based architecture, it also adds an additional byte overhead that can be removed using lower-level socket engineering.
 
+### Design Simplicity
+
+Above, we specified an enormous amount of detail for our naive protocol: buffering, error handling, watchdogs, etc. Most of this is abstracted away with GRPC, which basically handles the server side for you.
+
 ### Code simplicity
 
 We found that GRPC significantly simplified the protocol definition process, as it allowed us to specify our data types as a protobuf file and receive helper types and functions for transmitting those data types over the wire. Moreover, since GRPC handles much of the connectivity, it simplified the process of connecting the client to the server. Furthermore, we sometimes dealt with small byte errors (offsets, uncaught byte sends, etc.) as our own wire protocol became more complicated to handle the task at hand; GRPC fixed those issues for us.
@@ -202,8 +185,5 @@ We found that GRPC significantly simplified the protocol definition process, as 
 However, one downside of GRPC is that it requires additional dependencies both to compile the protobuf file and execute the resulting server code. Additionally, we found that GRCP had reduced flexibility when compard to the pure socket approach. For instance, when relying on sockets directly, we were able to arbitrarily deliver messages to the client at any time from the server. However, this is not possible using GRPC's standard RPC definitions, which rely on synchronous responses for each function in the service. GRPC does have a "stream" mode, but this still requires the client to initiate the RPC call, whereas sockets allow us to send messages to clients without their explicitly asking to receive them.
 
 Lastly, the naïve approach allowed us to more quickly modify and debug our code, changing our wire protocol at will, whereas GRPC would require recompiling with each change to our protocol. This flexibility is both a pro and a con, as it makes dev work more agile but also more prone to breaking.
-
-###
-
 
 
